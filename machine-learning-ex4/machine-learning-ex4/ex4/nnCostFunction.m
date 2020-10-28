@@ -67,22 +67,6 @@ Theta2_grad = zeros(size(Theta2));
 
 %getting layer 1 prediction. 
 
-
-fprintf('Size Of X ...\n')
-size(X)
-fprintf('Size Of y ...\n')
-size(y)
-fprintf('Size Of Theta1 ...\n')
-size(Theta1)
-fprintf('Size Of Theta2 ...\n')
-size(Theta2)
-
-fprintf('Size Of num_labels ...\n')
-size(num_labels)
-
-fprintf('Value of Y1 ...\n')
-
-y(2500,:)
 a1 = [ones(m, 1) X];
 
 z2 = a1*Theta1';
@@ -95,10 +79,6 @@ z3 = a2*Theta2';
 
 hx = sigmoid(z3);
 
-size(hx)
-
-hx(1,:)
-
 % creating the arrays based on the real value of the digit.
 
 realValues = zeros(size(y,1),10);
@@ -108,14 +88,15 @@ for n = 1:m
   realValues(n,value) = 1;
 endfor
 
-% getting all the cost from layer 1 to layer 2. 
-for z = 1:m 
-  singleValues = realValues(z,:);
-  singleValues
-  (((-1.*y(z)')*(singleValues))-((1.-y(z)')*(1.-singleValues)))
-  break
-endfor
+% getting all the cost from layer 1 to layer 2.
+Y = eye(num_labels)(y,:);
+J = (1/m)*(sum(sum(((-Y.*log(hx))-((1.-Y).*log(1.-hx))))));
 
+Theta1sq = Theta1 .^2;
+Theta2sq = Theta2 .^2;
+
+%J = (1/m)*(sum(sum(((-Y.*log(hx))-((1.-Y).*log(1.-hx))))))+(sum(sum(Theta2sq(:,2:hidden_layer_size+1))));
+J = J + ((lambda / (2 * m)) * ((sum(sum(Theta1sq(:,2:input_layer_size + 1)))) + (sum(sum(Theta2sq(:,2:hidden_layer_size+1))))) ); 
 
 
 
