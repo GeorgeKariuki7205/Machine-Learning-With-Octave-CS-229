@@ -67,15 +67,15 @@ Theta2_grad = zeros(size(Theta2));
 
 %getting layer 1 prediction. 
 
-a1 = [ones(m, 1) X];
+a1 = [ones(m, 1), X];
 
-z2 = a1*Theta1';
+z2 = Theta1*a1';
 
 a2 = sigmoid(z2);
 
-a2 = [ones(size(a2,1), 1) a2];
+a2 = [ones(m, 1), a2'];
 
-z3 = a2*Theta2';
+z3 = Theta2*a2';
 
 hx = sigmoid(z3);
 
@@ -90,7 +90,7 @@ endfor
 
 % getting all the cost from layer 1 to layer 2.
 Y = eye(num_labels)(y,:);
-J = (1/m)*(sum(sum(((-Y.*log(hx))-((1.-Y).*log(1.-hx))))));
+J = (1/m)*(sum(sum(((-Y'.*log(hx))-((1.-Y)'.*log(1.-hx))))));
 
 Theta1sq = Theta1 .^2;
 Theta2sq = Theta2 .^2;
@@ -99,19 +99,39 @@ Theta2sq = Theta2 .^2;
 J = J + ((lambda / (2 * m)) * ((sum(sum(Theta1sq(:,2:input_layer_size + 1)))) + (sum(sum(Theta2sq(:,2:hidden_layer_size+1))))) ); 
 
 
+%implementing the back propagation algorithm.  
+largeDelta = 0;
+for n = 1:m 
+  
+  %step 1: perform foward propagation for each training example.  
+  a_1 = X(n,:)';
+  a_1 = [1; a_1];
+  z_2 = Theta1*a_1;
+  a_2 = sigmoid(z_2);
+  a_2 = [1; a_2];
+  z_3 = Theta2*a_2;
+  a_3 = sigmoid(z_3);
+  
+  smallDelta3 = a_3-Y(n,:)';
+  smallDelta2 = (Theta2'*smallDelta3).*sigmoidGradient([1;z_2]);
+  smallDelta2 = smallDelta2(2:end);
+  Theta2_grad = Theta2_grad + (smallDelta3*a_2');
+  Theta1_grad = Theta1_grad + (smallDelta2*a_1');
+  
+endfor
+Theta2_grad = Theta2_grad/m ;
+Theta1_grad = Theta1_grad/m;
 
 
-
-
-
-
-
-% -------------------------------------------------------------
+% Add regularization terms
+Theta1_grad(:,2:end) = Theta1_grad(:,2:end) + (lambda/m) * Theta1(:,2:end);
+Theta2_grad(:,2:end) = Theta2_grad(:,2:end) + (lambda/m) * Theta2(:,2:end);
 
 % =========================================================================
 
 % Unroll gradients
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
+
 
 
 end
